@@ -46,6 +46,10 @@ npm run dev
 npm run build
 ```
 
+## Deployment Status
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/ashok-cleaning-services/deploy-status)](https://app.netlify.com/sites/ashok-cleaning-services/deploys)
+
 ## Contact
 
 For more information about our services, please visit our website or contact us directly.
