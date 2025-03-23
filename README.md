@@ -48,7 +48,7 @@ npm run build
 
 ## Deployment Status
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/644ad5ee-c0f2-4329-9408-b93821f209eb/deploy-status)](https://app.netlify.com/sites/ashok-cleaning-services/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/644ad5ee-c0f2-4329-9408-b93821f209eb/deploy-status)](https://app.netlify.com/sites/guileless-belekoy-267fdf/deploys)
 
 ## Contact
 
