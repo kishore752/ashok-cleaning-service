@@ -1,0 +1,123 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import ImageSlider from '@/components/ImageSlider.vue'
+import ContactForm from '@/components/ContactForm.vue'
+
+const showForm = ref(false)
+</script>
+
+<template>
+  <main>
+    <ImageSlider />
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Welcome to Ashok Cleaning Service</h1>
+        <p>Professional cleaning services for your home and office</p>
+        <button @click="showForm = true" class="cta-button">Get a Quote</button>
+      </div>
+    </section>
+
+    <!-- Contact Form Modal -->
+    <div v-if="showForm" class="modal-overlay" @click="showForm = false">
+      <div class="modal-content" @click.stop>
+        <button class="close-button" @click="showForm = false">&times;</button>
+        <ContactForm />
+      </div>
+    </div>
+  </main>
+</template>
+
+<style scoped>
+main {
+  min-height: 100vh;
+}
+
+.hero {
+  padding: 4rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  color: #1b5e20;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #2e7d32;
+  margin-bottom: 2rem;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: #1b5e20;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+  background: #2e7d32;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.5rem;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: #1b5e20;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+}
+</style>
