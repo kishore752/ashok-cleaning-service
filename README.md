@@ -22,6 +22,7 @@ Ashok Cleaning Services provides professional cleaning solutions for homes and o
 - Professional image gallery
 - Contact form with email notifications
 - Mobile-friendly interface
+- Automated deployment with GitHub Actions
 
 ## Technology Stack
 
@@ -30,6 +31,7 @@ Ashok Cleaning Services provides professional cleaning solutions for homes and o
 - Vite
 - Netlify Functions
 - SendGrid for email notifications
+- GitHub Actions for CI/CD
 
 ## Development
 
