@@ -121,13 +121,22 @@
 <style scoped>
 .company-logo {
   display: block;
-  max-width: 100%;
+  width: 100%;
+  max-width: 300px;
   height: auto;
+  margin: 0;
+  padding: 0;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
   transition: transform 0.3s ease;
 }
 
 .company-logo:hover {
   transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+  .company-logo {
+    max-width: 250px;
+  }
 }
 </style>
