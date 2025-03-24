@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { sendContactEmail } from '@/services/emailService'
 
 declare global {
   interface Window {
@@ -72,92 +73,91 @@ const isSubmitting = ref(false)
 
 const initGooglePlaces = () => {
   console.log('Initializing Google Places...')
-  if (!window.google) {
-    console.error('Google Maps API not loaded')
-    return
-  }
-  if (!window.google.maps) {
-    console.error('Google Maps not available')
-    return
-  }
-  if (!window.google.maps.places) {
-    console.error('Google Places API not available')
-    return
-  }
-  if (!addressInput.value) {
-    console.error('Address input element not found')
-    return
-  }
+  if (addressInput.value && window.google?.maps?.places) {
+    console.log('Google Places API is available')
+    const options = {
+      componentRestrictions: { country: 'gb' },
+      fields: ['address_components', 'formatted_address'],
+      types: ['address'],
+    }
 
-  console.log('Google Places API is available')
-  const options = {
-    componentRestrictions: { country: 'gb' },
-    fields: ['address_components', 'formatted_address'],
-    types: ['address'],
-  }
+    try {
+      addressAutocomplete.value = new window.google.maps.places.Autocomplete(
+        addressInput.value,
+        options,
+      )
+      console.log('Autocomplete initialized successfully')
 
-  try {
-    addressAutocomplete.value = new window.google.maps.places.Autocomplete(
-      addressInput.value,
-      options,
-    )
-    console.log('Autocomplete initialized successfully')
+      // Show suggestions when typing
+      addressInput.value.addEventListener('input', () => {
+        const inputValue = addressInput.value?.value
+        console.log('Input value changed:', inputValue)
+        if (inputValue && inputValue.length > 0) {
+          isLoading.value = true
+          console.log('Fetching place predictions...')
+          const service = new window.google.maps.places.AutocompleteService()
+          service.getPlacePredictions(
+            {
+              input: inputValue,
+              componentRestrictions: { country: 'gb' },
+              types: ['address'],
+            },
+            (predictions: Prediction[] | null, status: string) => {
+              console.log('Predictions response:', { predictions, status })
+              if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                console.log('Successfully got predictions:', predictions)
+              } else {
+                console.log('Error getting predictions:', status)
+              }
+              isLoading.value = false
+            },
+          )
+        } else {
+          isLoading.value = false
+        }
+      })
 
-    // Show suggestions when typing
-    addressInput.value.addEventListener('input', () => {
-      const inputValue = addressInput.value?.value
-      console.log('Input value changed:', inputValue)
-      if (inputValue && inputValue.length > 0) {
-        isLoading.value = true
-        console.log('Fetching place predictions...')
-        // Trigger the autocomplete service
-        const service = new window.google.maps.places.AutocompleteService()
-        service.getPlacePredictions(
-          {
-            input: inputValue,
-            componentRestrictions: { country: 'gb' },
-            types: ['address'],
-          },
-          (predictions: Prediction[] | null, status: string) => {
-            console.log('Predictions response:', { predictions, status })
-            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-              console.log('Successfully got predictions:', predictions)
-            } else {
-              console.log('Error getting predictions:', status)
+      addressAutocomplete.value.addListener('place_changed', () => {
+        console.log('Place changed event triggered')
+        try {
+          const place = addressAutocomplete.value?.getPlace() as Place
+          console.log('Selected place:', place)
+          if (place.address_components) {
+            // Find postcode from address components
+            const postcodeComponent = place.address_components.find((component: AddressComponent) =>
+              component.types.includes('postal_code'),
+            )
+            if (postcodeComponent) {
+              form.value.postcode = postcodeComponent.long_name
+              console.log('Updated postcode:', postcodeComponent.long_name)
+              validatePostcode(postcodeComponent.long_name)
             }
-            isLoading.value = false
-          },
-        )
-      } else {
-        isLoading.value = false
-      }
-    })
 
-    addressAutocomplete.value.addListener('place_changed', () => {
-      console.log('Place changed event triggered')
-      const place = addressAutocomplete.value?.getPlace() as Place
-      console.log('Selected place:', place)
-      if (place.address_components) {
-        form.value.address = place.formatted_address
-        console.log('Updated address:', place.formatted_address)
-        // Find postcode from address components
-        const postcodeComponent = place.address_components.find((component: AddressComponent) =>
-          component.types.includes('postal_code'),
-        )
-        if (postcodeComponent) {
-          form.value.postcode = postcodeComponent.long_name
-          console.log('Updated postcode:', postcodeComponent.long_name)
-          validatePostcode(postcodeComponent.long_name)
+            // Create address without postcode
+            const addressComponents = place.address_components.filter(
+              (component: AddressComponent) => !component.types.includes('postal_code'),
+            )
+            form.value.address = addressComponents
+              .map((component: AddressComponent) => component.long_name)
+              .join(', ')
+            console.log('Updated address:', form.value.address)
+
+            // Close the dropdown
+            if (addressInput.value) {
+              addressInput.value.blur()
+            }
+          }
+        } catch (error) {
+          console.error('Error getting place details:', error)
+        } finally {
+          isLoading.value = false
         }
-        // Close the dropdown
-        if (addressInput.value) {
-          addressInput.value.blur()
-        }
-      }
-      isLoading.value = false
-    })
-  } catch (error) {
-    console.error('Error initializing Google Places:', error)
+      })
+    } catch (error) {
+      console.error('Error initializing Google Places:', error)
+    }
+  } else {
+    console.error('Google Places API not available')
   }
 }
 
@@ -176,7 +176,7 @@ const verifyRecaptcha = async () => {
   return new Promise<string>((resolve, reject) => {
     window.grecaptcha.ready(async () => {
       try {
-        const token = await window.grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY', {
+        const token = await window.grecaptcha.execute('6LeC4v4qAAAAANk9WzyXviWSUE8FKOBEEc5jymLy', {
           action: 'submit',
         })
         resolve(token)
@@ -199,11 +199,14 @@ const handleSubmit = async () => {
     isSubmitting.value = true
     const recaptchaToken = await verifyRecaptcha()
 
-    // Handle form submission with recaptcha token
-    console.log('Form submitted:', {
+    // Send email notification
+    await sendContactEmail({
       ...form.value,
       recaptchaToken,
     })
+
+    // Show success message
+    alert('Thank you for your message. We will get back to you shortly!')
 
     // Reset form
     form.value = {
@@ -250,12 +253,24 @@ onMounted(() => {
       <h1>Contact Us</h1>
       <p class="subtitle">Fill out the form below and we'll get back to you shortly</p>
 
-      <form @submit.prevent="handleSubmit" class="contact-form">
+      <form
+        @submit.prevent="handleSubmit"
+        class="contact-form"
+        name="contact"
+        method="POST"
+        data-netlify="true"
+        data-netlify-recaptcha="true"
+      >
+        <!-- Hidden input for Netlify -->
+        <input type="hidden" name="form-name" value="contact" />
+
+        <!-- Rest of your form fields -->
         <div class="form-group">
           <label for="name">Full Name *</label>
           <input
             id="name"
             v-model="form.name"
+            name="name"
             type="text"
             required
             placeholder="Enter your full name"
@@ -267,6 +282,7 @@ onMounted(() => {
           <input
             id="email"
             v-model="form.email"
+            name="email"
             type="email"
             required
             placeholder="Enter your email address"
@@ -278,6 +294,7 @@ onMounted(() => {
           <input
             id="phone"
             v-model="form.phone"
+            name="phone"
             type="tel"
             required
             placeholder="Enter your phone number"
@@ -291,6 +308,7 @@ onMounted(() => {
               ref="addressInput"
               id="address"
               v-model="form.address"
+              name="address"
               type="text"
               required
               placeholder="Start typing your address..."
@@ -309,6 +327,7 @@ onMounted(() => {
             ref="postcodeInput"
             id="postcode"
             v-model="form.postcode"
+            name="postcode"
             type="text"
             required
             placeholder="Enter postcode"
@@ -322,7 +341,7 @@ onMounted(() => {
 
         <div class="form-group">
           <label for="service">Service Required *</label>
-          <select id="service" v-model="form.service" required>
+          <select id="service" v-model="form.service" name="service" required>
             <option value="">Select a service</option>
             <option v-for="service in services" :key="service" :value="service">
               {{ service }}
@@ -332,7 +351,13 @@ onMounted(() => {
 
         <div class="form-group">
           <label for="preferredDate">Preferred Date *</label>
-          <input id="preferredDate" v-model="form.preferredDate" type="date" required />
+          <input
+            id="preferredDate"
+            v-model="form.preferredDate"
+            name="preferredDate"
+            type="date"
+            required
+          />
         </div>
 
         <div class="form-group">
@@ -340,6 +365,7 @@ onMounted(() => {
           <textarea
             id="comments"
             v-model="form.comments"
+            name="comments"
             rows="6"
             maxlength="1000"
             placeholder="Please describe your requirements in detail..."
@@ -374,37 +400,46 @@ onMounted(() => {
 <style scoped>
 .contact-view {
   min-height: 100vh;
-  padding: 4rem 2rem;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 2rem 2rem;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url('/images/contact-bg.jpg') center/cover no-repeat;
+  position: relative;
 }
 
 .contact-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 h1 {
-  color: #1b5e20;
+  color: #ffffff;
   text-align: center;
   margin-bottom: 0.5rem;
   font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .subtitle {
   text-align: center;
-  color: #666;
+  color: #ffffff;
   margin-bottom: 2rem;
   font-size: 1.1rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .contact-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .form-group {
@@ -425,7 +460,8 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  background: white;
 }
 
 input:focus,
@@ -523,10 +559,14 @@ textarea {
 
 @media (max-width: 768px) {
   .contact-view {
-    padding: 2rem 1rem;
+    padding: 1rem 1rem;
   }
 
   .contact-container {
+    padding: 0.5rem;
+  }
+
+  .contact-form {
     padding: 1.5rem;
   }
 
