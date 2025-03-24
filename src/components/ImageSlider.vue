@@ -1,8 +1,17 @@
 <template>
   <div class="slider-container">
-    <div class="slider" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
-      <div v-for="(image, index) in images" :key="index" class="slide">
-        <img :src="image.url" :alt="image.alt" />
+    <div class="slides-container" :class="{ 'is-transitioning': isTransitioning }">
+      <div
+        v-for="(image, index) in [...images, images[0], images[images.length - 1]]"
+        :key="index"
+        class="slide"
+        :style="{
+          transform: `translateX(${(index - currentIndex) * 100}%)`,
+          transition: isTransitioning ? 'none' : 'transform 0.5s ease-in-out',
+          opacity: '1',
+        }"
+      >
+        <img :src="image.url" :alt="image.title" />
         <div class="slide-content">
           <h2>{{ image.title }}</h2>
           <p>{{ image.description }}</p>
@@ -57,13 +66,40 @@ const images = [
 
 const currentIndex = ref(0)
 let intervalId: number | null = null
+const isTransitioning = ref(false)
 
 const nextSlide = () => {
-  currentIndex.value = (currentIndex.value + 1) % images.length
+  currentIndex.value++
+  // If we've reached the clone of the first image
+  if (currentIndex.value === images.length) {
+    // Wait for the transition to complete
+    setTimeout(() => {
+      // Without transition, jump back to the real first image
+      isTransitioning.value = true
+      currentIndex.value = 0
+      // Re-enable transitions
+      setTimeout(() => {
+        isTransitioning.value = false
+      }, 50)
+    }, 500)
+  }
 }
 
 const prevSlide = () => {
-  currentIndex.value = (currentIndex.value - 1 + images.length) % images.length
+  currentIndex.value--
+  // If we've reached the clone of the last image
+  if (currentIndex.value === -1) {
+    // Wait for the transition to complete
+    setTimeout(() => {
+      // Without transition, jump back to the real last image
+      isTransitioning.value = true
+      currentIndex.value = images.length - 1
+      // Re-enable transitions
+      setTimeout(() => {
+        isTransitioning.value = false
+      }, 50)
+    }, 500)
+  }
 }
 
 const startAutoSlide = () => {
@@ -95,23 +131,34 @@ onUnmounted(() => {
   margin-bottom: 2rem;
 }
 
-.slider {
-  display: flex;
+.slides-container {
+  position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.5s ease-in-out;
+  overflow: hidden;
+}
+
+.slides-container.is-transitioning .slide {
+  transition: none;
 }
 
 .slide {
-  min-width: 100%;
+  position: absolute;
+  width: 100%;
   height: 100%;
-  position: relative;
+  transition: transform 0.5s ease-in-out;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .slide-content {
