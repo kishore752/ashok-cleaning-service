@@ -2,17 +2,16 @@
   <div class="slider-container">
     <div class="slides-container" :class="{ 'is-transitioning': isTransitioning }">
       <div
-        v-for="(image, index) in [...images, images[0], images[images.length - 1]]"
+        v-for="(image, index) in images"
         :key="index"
         class="slide"
         :style="{
           transform: `translateX(${(index - currentIndex) * 100}%)`,
-          transition: isTransitioning ? 'none' : 'transform 0.5s ease-in-out',
-          opacity: '1',
         }"
+        @click="navigateToService(image.serviceId)"
       >
-        <img :src="image.url" :alt="image.title" />
-        <div class="slide-content">
+        <img :src="image.url" :alt="image.title" @error="handleImageError(index)" />
+        <div class="slide-content" @click.stop="navigateToService(image.serviceId)">
           <h2>{{ image.title }}</h2>
           <p>{{ image.description }}</p>
         </div>
@@ -42,31 +41,59 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const images = [
   {
-    url: '/images/slider/cleaning-1.jpg',
+    url: 'images/slider/cleaning-service-1.jpg',
     title: 'Professional Cleaning Services',
-    description: 'Experience the difference with our expert cleaning team',
-    alt: 'Professional cleaning service',
+    description: 'Expert cleaning solutions for your home and business',
+    serviceId: 'residential-cleaning',
   },
   {
-    url: '/images/slider/cleaning-2.jpg',
-    title: 'Quality You Can Trust',
-    description: 'Using eco-friendly products for a healthier environment',
-    alt: 'Quality cleaning service',
+    url: 'images/slider/cleaning-service-2.jpg',
+    title: 'Deep Cleaning Specialists',
+    description: 'Thorough cleaning for every corner of your space',
+    serviceId: 'deep-cleaning',
   },
   {
-    url: '/images/slider/cleaning-3.jpg',
-    title: 'Satisfaction Guaranteed',
-    description: '100% satisfaction guaranteed on all our services',
-    alt: 'Satisfaction guaranteed',
+    url: 'images/slider/cleaning-service-3.jpg',
+    title: 'Office Cleaning Services',
+    description: 'Maintain a professional and healthy work environment',
+    serviceId: 'office-cleaning',
+  },
+  {
+    url: 'images/slider/cleaning-service-4.jpg',
+    title: 'Residential Cleaning',
+    description: 'Quality cleaning solutions for your home',
+    serviceId: 'residential-cleaning',
+  },
+  {
+    url: 'images/slider/cleaning-service-5.jpg',
+    title: 'Window Cleaning',
+    description: 'Crystal clear windows for maximum visibility',
+    serviceId: 'window-cleaning',
   },
 ]
 
 const currentIndex = ref(0)
 let intervalId: number | null = null
 const isTransitioning = ref(false)
+
+const handleImageError = (index: number) => {
+  console.error(`Failed to load image: ${images[index].url}`)
+  // Try to load the image again with a different path
+  const img = new Image()
+  img.onload = () => {
+    console.log(`Image loaded successfully: ${images[index].url}`)
+  }
+  img.onerror = () => {
+    console.error(`Image failed to load again: ${images[index].url}`)
+  }
+  img.src = images[index].url
+}
 
 const nextSlide = () => {
   currentIndex.value++
@@ -113,6 +140,10 @@ const stopAutoSlide = () => {
   }
 }
 
+const navigateToService = (serviceId: string) => {
+  router.push(`/services#${serviceId}`)
+}
+
 onMounted(() => {
   startAutoSlide()
 })
@@ -125,10 +156,14 @@ onUnmounted(() => {
 <style scoped>
 .slider-container {
   position: relative;
-  width: 100%;
-  height: 500px;
+  width: 100vw;
+  height: 600px;
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin: 0;
+  padding: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .slides-container {
@@ -150,6 +185,11 @@ onUnmounted(() => {
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  cursor: pointer;
+}
+
+.slide:hover {
+  opacity: 0.95;
 }
 
 .slide img {
@@ -166,33 +206,41 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 2rem;
-  padding-left: 4rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-  color: white;
+  padding: 3rem;
   text-align: left;
+  cursor: pointer;
+  width: 100%;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.3));
 }
 
 .slide-content h2 {
-  font-size: 2.5rem;
+  font-size: 3rem;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   text-align: left;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .slide-content p {
-  font-size: 1.2rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-size: 1.4rem;
   text-align: left;
+  max-width: 600px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 0.2px;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .slider-dots {
   position: absolute;
-  bottom: 1rem;
+  bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   z-index: 10;
 }
 
@@ -204,11 +252,12 @@ onUnmounted(() => {
   background: transparent;
   cursor: pointer;
   padding: 0;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .slider-dots button.active {
   background: white;
+  transform: scale(1.2);
 }
 
 .slider-arrow {
@@ -218,52 +267,60 @@ onUnmounted(() => {
   background: rgba(0, 0, 0, 0.5);
   color: white;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  transition: background-color 0.3s ease;
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
   z-index: 10;
 }
 
 .slider-arrow:hover {
   background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .prev {
-  left: 1rem;
+  left: 2rem;
 }
 
 .next {
-  right: 1rem;
+  right: 2rem;
 }
 
 @media (max-width: 768px) {
   .slider-container {
-    height: 300px;
+    height: 400px;
   }
 
   .slide-content {
-    padding: 1.5rem;
-    padding-left: 2rem;
+    padding: 2rem;
   }
 
   .slide-content h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .slide-content p {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 
   .slider-arrow {
-    width: 30px;
-    height: 30px;
-    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.4rem;
+  }
+
+  .prev {
+    left: 1rem;
+  }
+
+  .next {
+    right: 1rem;
   }
 }
 </style>
