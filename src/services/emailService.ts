@@ -12,8 +12,8 @@ interface ContactFormData {
 
 export const sendContactEmail = async (formData: ContactFormData) => {
   try {
-    // In development, use the Netlify Forms endpoint
-    const endpoint = import.meta.env.DEV ? '/.netlify/functions/contact' : '/api/contact'
+    // Always use the Netlify Functions endpoint
+    const endpoint = '/.netlify/functions/contact'
 
     const response = await fetch(endpoint, {
       method: 'POST',
