@@ -179,37 +179,68 @@ onUpdated(() => {
 .services-view {
   background-color: #f9f9f9;
   min-height: 100vh;
+  background-image: url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow-x: hidden;
+  left: 0;
+  right: 0;
 }
 
 .services-hero {
-  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  background: linear-gradient(rgba(46, 125, 50, 0.5), rgba(46, 125, 50, 0.7));
   color: white;
-  padding: 1.5rem 2rem;
+  padding: 2.5rem 2rem;
   text-align: center;
   margin-bottom: 2rem;
+  position: relative;
+  width: 100vw;
+  left: 0;
+  right: 0;
 }
 
 .services-title {
-  font-size: 1.75rem;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
   font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .services-subtitle {
-  font-size: 1rem;
-  opacity: 0.9;
+  font-size: 1.1rem;
+  opacity: 0.95;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
 }
 
 .services-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
 }
 
 .service-section {
   margin-bottom: 4rem;
   padding: 2rem;
   border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .service-section:last-child {
@@ -350,6 +381,7 @@ onUpdated(() => {
 @media (max-width: 768px) {
   .services-hero {
     padding: 1.25rem 1rem;
+    width: 100vw;
   }
 
   .services-title {
@@ -358,6 +390,10 @@ onUpdated(() => {
 
   .services-subtitle {
     font-size: 0.9rem;
+  }
+
+  .services-container {
+    padding: 0 1rem;
   }
 
   .service-section {

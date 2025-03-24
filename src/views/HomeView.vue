@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import ImageSlider from '@/components/ImageSlider.vue'
 import ContactForm from '@/components/ContactForm.vue'
 
+const router = useRouter()
 const showForm = ref(false)
 const showSuccess = ref(false)
 
@@ -13,6 +15,10 @@ const handleFormSuccess = () => {
     showSuccess.value = false
   }, 3000)
 }
+
+const navigateToContact = () => {
+  router.push('/contact')
+}
 </script>
 
 <template>
@@ -22,7 +28,7 @@ const handleFormSuccess = () => {
       <div class="hero-content">
         <h1>Welcome to Ashok Cleaning Service</h1>
         <p>Professional cleaning services for your home and office</p>
-        <button @click="showForm = true" class="cta-button">Get a Quote</button>
+        <button @click="navigateToContact" class="cta-button">Contact Us</button>
       </div>
     </section>
 
@@ -48,23 +54,33 @@ main {
   padding: 4rem 2rem;
   text-align: center;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  width: 100vw;
+  margin: 0;
+  position: relative;
+  left: 0;
+  right: 0;
 }
 
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .hero h1 {
   font-size: 2.5rem;
   color: #1b5e20;
   margin-bottom: 1rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .hero p {
   font-size: 1.2rem;
   color: #2e7d32;
   margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cta-button {
@@ -76,11 +92,14 @@ main {
   border-radius: 5px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .cta-button:hover {
   background: #2e7d32;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Modal Styles */
