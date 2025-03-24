@@ -7,7 +7,8 @@
   functions = "netlify/functions"
   publish = "dist"
   port = 8888
-  targetPort = 5174
+  targetPort = 5173
+  framework = "vite"
 
 [[redirects]]
   from = "/*"
@@ -15,4 +16,9 @@
   status = 200
 
 [functions]
-  node_bundler = "esbuild" 
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/contact"
+  to = "/.netlify/functions/contact"
+  status = 200 
