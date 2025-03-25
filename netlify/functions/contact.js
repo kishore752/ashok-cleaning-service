@@ -1,13 +1,31 @@
-import nodemailer from 'nodemailer'
+const nodemailer = require('nodemailer')
 
-export const handler = async (event, context) => {
+exports.handler = async function (event, context) {
+  // Log request details
+  console.log('Function invoked with method:', event.httpMethod)
+  console.log('Headers:', event.headers)
+
   // Only allow POST
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) }
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method Not Allowed' }),
+    }
   }
 
   try {
+    // Log environment variables (without sensitive data)
+    console.log('Environment check:', {
+      hasEmailUser: !!process.env.EMAIL_USER,
+      hasEmailPass: !!process.env.EMAIL_PASS,
+      hasNotificationEmail: !!process.env.NOTIFICATION_EMAIL,
+    })
+
     const formData = JSON.parse(event.body)
+    console.log('Received form data:', {
+      ...formData,
+      email: '***@***.com', // Hide actual email for security
+    })
 
     // Create email transporter
     const transporter = nodemailer.createTransport({
@@ -37,17 +55,30 @@ export const handler = async (event, context) => {
     }
 
     // Send email
+    console.log('Attempting to send email...')
     await transporter.sendMail(mailOptions)
+    console.log('Email sent successfully')
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Email sent successfully' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: 'Email sent successfully',
+      }),
     }
   } catch (error) {
     console.error('Function error:', error)
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to send email' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        error: 'Failed to send email',
+        details: error.message,
+      }),
     }
   }
 }
