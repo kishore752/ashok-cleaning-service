@@ -44,7 +44,7 @@ interface Prediction {
   place_id: string
 }
 
-const form = ref({
+const formData = ref({
   name: '',
   email: '',
   phone: '',
@@ -70,6 +70,7 @@ const postcodeInput = ref<HTMLInputElement | null>(null)
 const isPostcodeValid = ref(false)
 const isLoading = ref(false)
 const isSubmitting = ref(false)
+const selectedService = ref('')
 
 const initGooglePlaces = () => {
   console.log('Initializing Google Places...')
@@ -128,7 +129,7 @@ const initGooglePlaces = () => {
               component.types.includes('postal_code'),
             )
             if (postcodeComponent) {
-              form.value.postcode = postcodeComponent.long_name
+              formData.value.postcode = postcodeComponent.long_name
               console.log('Updated postcode:', postcodeComponent.long_name)
               validatePostcode(postcodeComponent.long_name)
             }
@@ -137,10 +138,10 @@ const initGooglePlaces = () => {
             const addressComponents = place.address_components.filter(
               (component: AddressComponent) => !component.types.includes('postal_code'),
             )
-            form.value.address = addressComponents
+            formData.value.address = addressComponents
               .map((component: AddressComponent) => component.long_name)
               .join(', ')
-            console.log('Updated address:', form.value.address)
+            console.log('Updated address:', formData.value.address)
 
             // Close the dropdown
             if (addressInput.value) {
@@ -201,7 +202,7 @@ const handleSubmit = async () => {
 
     // Send email notification
     await sendContactEmail({
-      ...form.value,
+      ...formData.value,
       recaptchaToken,
     })
 
@@ -209,7 +210,7 @@ const handleSubmit = async () => {
     alert('Thank you for your message. We will get back to you shortly!')
 
     // Reset form
-    form.value = {
+    formData.value = {
       name: '',
       email: '',
       phone: '',
@@ -244,6 +245,15 @@ onMounted(() => {
       }
     }, 100)
   }
+
+  // Check for pre-selected service
+  const service = localStorage.getItem('selectedService')
+  if (service) {
+    selectedService.value = service
+    formData.value.service = service
+    // Clear the localStorage after getting the value
+    localStorage.removeItem('selectedService')
+  }
 })
 </script>
 
@@ -269,7 +279,7 @@ onMounted(() => {
           <label for="name">Full Name *</label>
           <input
             id="name"
-            v-model="form.name"
+            v-model="formData.name"
             name="name"
             type="text"
             required
@@ -281,7 +291,7 @@ onMounted(() => {
           <label for="email">Email Address *</label>
           <input
             id="email"
-            v-model="form.email"
+            v-model="formData.email"
             name="email"
             type="email"
             required
@@ -293,7 +303,7 @@ onMounted(() => {
           <label for="phone">Phone Number *</label>
           <input
             id="phone"
-            v-model="form.phone"
+            v-model="formData.phone"
             name="phone"
             type="tel"
             required
@@ -307,7 +317,7 @@ onMounted(() => {
             <input
               ref="addressInput"
               id="address"
-              v-model="form.address"
+              v-model="formData.address"
               name="address"
               type="text"
               required
@@ -326,22 +336,22 @@ onMounted(() => {
           <input
             ref="postcodeInput"
             id="postcode"
-            v-model="form.postcode"
+            v-model="formData.postcode"
             name="postcode"
             type="text"
             required
             placeholder="Enter postcode"
             @input="handlePostcodeChange"
-            :class="{ invalid: form.postcode && !isPostcodeValid }"
+            :class="{ invalid: formData.postcode && !isPostcodeValid }"
           />
-          <span v-if="form.postcode && !isPostcodeValid" class="error-message">
+          <span v-if="formData.postcode && !isPostcodeValid" class="error-message">
             Please enter a valid UK postcode
           </span>
         </div>
 
         <div class="form-group">
           <label for="service">Service Required *</label>
-          <select id="service" v-model="form.service" name="service" required>
+          <select id="service" v-model="formData.service" name="service" required>
             <option value="">Select a service</option>
             <option v-for="service in services" :key="service" :value="service">
               {{ service }}
@@ -353,7 +363,7 @@ onMounted(() => {
           <label for="preferredDate">Preferred Date *</label>
           <input
             id="preferredDate"
-            v-model="form.preferredDate"
+            v-model="formData.preferredDate"
             name="preferredDate"
             type="date"
             required
@@ -364,14 +374,14 @@ onMounted(() => {
           <label for="comments">Additional Details (Max 200 words)</label>
           <textarea
             id="comments"
-            v-model="form.comments"
+            v-model="formData.comments"
             name="comments"
             rows="6"
             maxlength="1000"
             placeholder="Please describe your requirements in detail..."
           ></textarea>
           <div class="word-count">
-            {{ form.comments.split(/\s+/).filter((word) => word.length > 0).length }}/200 words
+            {{ formData.comments.split(/\s+/).filter((word) => word.length > 0).length }}/200 words
           </div>
         </div>
 
