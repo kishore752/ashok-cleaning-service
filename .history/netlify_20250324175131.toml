@@ -10,14 +10,13 @@
   targetPort = 5173
   framework = "vite"
 
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[functions]
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/.netlify/functions/*"
