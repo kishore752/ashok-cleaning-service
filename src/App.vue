@@ -26,6 +26,18 @@ import TheHeader from './components/TheHeader.vue'
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body,
+html {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -40,14 +52,14 @@ body {
   background-position: center;
   background-attachment: fixed;
   min-height: 100vh;
-  position: relative;
   filter: brightness(1.1);
 }
 
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+@supports (-webkit-touch-callout: none) {
+  /* CSS specific to iOS devices */
+  body {
+    background-attachment: scroll;
+  }
 }
 
 main {
@@ -55,6 +67,8 @@ main {
   width: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 .app-container {
@@ -64,7 +78,8 @@ main {
   flex-direction: column;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Add subtle shadow to cards and sections */
@@ -98,11 +113,14 @@ button {
 input,
 textarea,
 select {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-size: 16px !important;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 100%;
+  min-height: 44px;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 /* Add subtle animations */
@@ -134,21 +152,76 @@ body::before {
   z-index: 0;
 }
 
+/* Improve form elements for mobile */
+input,
+textarea,
+select {
+  font-size: 16px !important; /* Prevents zoom on iOS */
+  max-width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 6px;
+}
+
+/* Better button touch targets */
+button {
+  min-height: 44px;
+  padding: 10px 20px;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+/* Improve mobile tap targets */
+a {
+  padding: 8px 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Responsive text sizing */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.75rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.25rem !important;
+  }
+
+  p,
+  li {
+    font-size: 0.95rem !important;
+  }
+}
+
+/* Safe area insets for modern iOS devices */
+@supports (padding: max(0px)) {
+  .app-container {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
 .footer {
   background: #1b5e20;
   color: white;
-  padding: 2rem 0;
-  width: 100vw;
+  padding: 2rem max(1rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+  width: 100%;
   margin: 0;
   position: relative;
-  left: 0;
-  right: 0;
 }
 
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -178,15 +251,17 @@ body::before {
 }
 
 @media (max-width: 768px) {
-  .footer-content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+  .footer {
+    padding: 1.5rem max(1rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-left));
   }
 
-  .footer-links {
-    flex-direction: column;
-    gap: 0.5rem;
+  .footer-content {
+    padding: 0 0.5rem;
+  }
+
+  .footer p {
+    font-size: 0.85rem !important;
   }
 }
 </style>
