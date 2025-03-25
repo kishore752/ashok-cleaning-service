@@ -21,7 +21,6 @@
             </RouterLink>
           </div>
         </div>
-        <RouterLink to="/about" class="nav-link">About</RouterLink>
         <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
       </nav>
       <div class="mobile-menu">
@@ -31,9 +30,6 @@
         </button>
         <div v-if="isMobileMenuOpen" class="dropdown-menu">
           <RouterLink to="/" class="dropdown-item" @click="selectOption('Home')">Home</RouterLink>
-          <RouterLink to="/about" class="dropdown-item" @click="selectOption('About')"
-            >About</RouterLink
-          >
           <RouterLink to="/contact" class="dropdown-item" @click="selectOption('Contact')"
             >Contact</RouterLink
           >

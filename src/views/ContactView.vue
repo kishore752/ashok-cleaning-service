@@ -400,19 +400,34 @@ onMounted(() => {
 <style scoped>
 .contact-view {
   min-height: 100vh;
-  padding: 2rem 2rem;
-  background:
-    linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url('/images/contact-bg.jpg') center/cover no-repeat;
+  width: 100%;
+  overflow-x: hidden;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: url('/images/contact-bg.jpg') center/cover no-repeat fixed;
+}
+
+.contact-view::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
+  z-index: 1;
 }
 
 .contact-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 1rem;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 max(1rem, env(safe-area-inset-left));
 }
 
 h1 {
@@ -427,41 +442,33 @@ h1 {
   text-align: center;
   color: #ffffff;
   margin-bottom: 2rem;
-  font-size: 1.1rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
   background: rgba(255, 255, 255, 0.85);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 label {
   font-weight: 500;
   color: #333;
+  display: block;
+  margin-bottom: 0.5rem;
 }
 
-input,
-select,
-textarea {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: white;
+select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
 }
 
 input:focus,
@@ -483,8 +490,8 @@ input.invalid {
 }
 
 textarea {
-  resize: vertical;
   min-height: 120px;
+  resize: vertical;
 }
 
 .word-count {
@@ -494,19 +501,15 @@ textarea {
 }
 
 .submit-button {
+  width: 100%;
   background: #1b5e20;
   color: white;
-  padding: 1rem 2rem;
   border: none;
-  border-radius: 6px;
-  font-size: 1.1rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
   margin-top: 1rem;
 }
 
-.submit-button:hover {
+.submit-button:hover:not(:disabled) {
   background: #2e7d32;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -515,18 +518,6 @@ textarea {
 .submit-button:disabled {
   background: #ccc;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.address-input-container {
-  position: relative;
-  width: 100%;
-}
-
-.address-input {
-  width: 100%;
-  padding-right: 40px; /* Make room for the spinner */
 }
 
 .loading-indicator {
@@ -534,9 +525,6 @@ textarea {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .spinner {
@@ -557,28 +545,6 @@ textarea {
   }
 }
 
-@media (max-width: 768px) {
-  .contact-view {
-    padding: 1rem 1rem;
-  }
-
-  .contact-container {
-    padding: 0.5rem;
-  }
-
-  .contact-form {
-    padding: 1.5rem;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-}
-
 .recaptcha-notice {
   margin-top: 1rem;
   text-align: center;
@@ -593,5 +559,31 @@ textarea {
 
 .recaptcha-notice a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .contact-container {
+    margin: 1rem auto;
+  }
+
+  .contact-form {
+    padding: 1.5rem;
+    margin: 0 0.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-form {
+    padding: 1rem;
+  }
+
+  .submit-button {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
 }
 </style>
