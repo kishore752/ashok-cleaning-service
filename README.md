@@ -29,9 +29,43 @@ Ashok Cleaning Services provides professional cleaning solutions for homes and o
 - Vue 3
 - TypeScript
 - Vite
-- Netlify Functions
-- SendGrid for email notifications
+- Pinia (auth state)
+- Supabase (optional): auth, roles, free-tier storage, real reviews
+- Netlify Functions + SendGrid (email and notifications)
 - GitHub Actions for CI/CD
+
+## Backend & auth (optional)
+
+To enable **secured backend with roles**, **customer history**, **real reviews**, and **notification service**:
+
+1. **Supabase (free tier)**  
+   - Create a project at [supabase.com](https://supabase.com).  
+   - In SQL Editor, run the migration: `supabase/migrations/001_initial_schema.sql`.  
+   - In Project Settings → API, copy **Project URL** and **Publishable** key (use this for the frontend; do not use the Secret key).
+
+2. **Environment variables**  
+   - **Local:** create `.env` or `.env.local` with:
+     - `VITE_SUPABASE_URL=` your project URL  
+     - `VITE_SUPABASE_ANON_KEY=` your **Publishable** key  
+   - **Netlify:** add the same `VITE_*` vars and your existing SendGrid/email vars.  
+   - Optional: `SEND_CUSTOMER_CONFIRMATION=true` to email customers a confirmation when they submit the contact form.  
+   - Optional: `NOTIFICATION_SECRET` to protect the `/.netlify/functions/send-notification` endpoint (for ads/updates).
+
+3. **First admin**  
+   After signing up your first user, in Supabase SQL Editor run:
+   ```sql
+   UPDATE public.profiles SET role = 'admin' WHERE id = 'YOUR_USER_UUID';
+   ```
+   (Find your user UUID in Authentication → Users.)
+
+4. **Roles**  
+   - **Customer:** sign up or log in; use Dashboard to see previous interactions and notification preferences.  
+   - **Employee:** admin creates an invite (Admin → Invite employee), then the employee signs up via the invite link.  
+   - **Admin:** manage employees, submissions, and approve/reject reviews.
+
+5. **Notifications**  
+   - Contact form submissions can send a confirmation email when `SEND_CUSTOMER_CONFIRMATION=true`.  
+   - Use `POST /.netlify/functions/send-notification` with `{ "to": "email", "title": "...", "body": "..." }` (and optional `Authorization: Bearer NOTIFICATION_SECRET`) to send updates or promos; hook this to a cron or Supabase webhook for behavior based on user interactions.
 
 ## Development
 
